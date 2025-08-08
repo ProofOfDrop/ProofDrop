@@ -16,7 +16,7 @@
         "ctaButtons": [
           {
             "label": "🔗 Connect Wallet",
-            "action": "connect_wallet"
+            "action": "https://proofofdrop.github.io/ProofDrop-Score/"
           },
           {
             "label": "📬 Join Early Access",
