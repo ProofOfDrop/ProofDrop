@@ -78,23 +78,28 @@ let scoreBreakdown = {};
 
 // Initialize app
 async function init() {
-    // Initialize services
-    await MoralisService.init('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjQwMDhkMTc4LWQxNmItNDU4Yy05MTRkLWNlZjU1YzZmMjdiMyIsIm9yZ0lkIjoiNDY0MzAyIiwidXNlcklkIjoiNDc3NjY3IiwidHlwZUlkIjoiYTNhODc2MmUtYWRiNS00MDk1LWFmNmEtNDhmNGQ5ZTA4NDVkIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3NTQ4MTI3MjQsImV4cCI6NDkxMDU3MjcyNH0.ssV3d1p5s7iDcYT2rZtosJ8J_z1cuuNvF9bU5X8O2HY');
-    await CovalentService.init('cqt_rQYkGgFvK3CcfjKw9K4gGBQmxyRK');
-    
-   console.log('Services initialized');
+    console.log('Initializing app...');
+    try {
+        // Initialize services
+        await MoralisService.init('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjQwMDhkMTc4LWQxNmItNDU4Yy05MTRkLWNlZjU1YzZmMjdiMyIsIm9yZ0lkIjoiNDY0MzAyIiwidXNlcklkIjoiNDc3NjY3IiwidHlwZUlkIjoiYTNhODc2MmUtYWRiNS00MDk1LWFmNmEtNDhmNGQ5ZTA4NDVkIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3NTQ4MTI3MjQsImV4cCI6NDkxMDU3MjcyNH0.ssV3d1p5s7iDcYT2rZtosJ8J_z1cuuNvF9bU5X8O2HY');
+        await CovalentService.init('cqt_rQYkGgFvK3CcfjKw9K4gGBQmxyRK');
+        console.log('Services initialized');
     } catch (error) {
         console.error('Service initialization error:', error);
         alert('Error initializing services: ' + error.message);
+        return;
     }
 
     // Check if wallet is already connected
     if (web3Modal.cachedProvider) {
+        console.log('Found cached provider');
         try {
             await connectWallet();
         } catch (error) {
             console.error('Auto-connect failed:', error);
         }
+    } else {
+        console.log('No cached provider found');
     }
 
     // Set up event listeners
@@ -103,25 +108,55 @@ async function init() {
     document.getElementById('mintBadgeBtn').addEventListener('click', mintProofBadge);
 
     console.log('Event listeners set');
+    
+    // Check for wallet presence
+    if (typeof window.ethereum === 'undefined') {
+        console.log('No Ethereum provider detected');
+        alert('No Ethereum wallet detected. Please install MetaMask or another Web3 wallet.');
+    } else {
+        console.log('Ethereum provider detected');
+    }
 }
 
 // Connect wallet
 async function connectWallet() {
+    console.log('Connect wallet called');
     try {
-        provider = await web3Modal.connect();
-        web3 = new Web3(provider);
-
-        // Add this at the top of connectWallet function
-        console.log('connectWallet called');
+        // Fallback for direct connection
+        if (typeof web3Modal === 'undefined' || !web3Modal.connect) {
+            console.log('Using direct connection to window.ethereum');
+            if (window.ethereum) {
+                provider = window.ethereum;
+                try {
+                    await provider.request({ method: 'eth_requestAccounts' });
+                    web3 = new Web3(provider);
+                } catch (error) {
+                    console.error('Direct connection error:', error);
+                    alert('Please connect through your wallet extension');
+                    return;
+                }
+            } else {
+                alert('No Ethereum provider found');
+                return;
+            }
+        } else {
+            console.log('Using Web3Modal connection');
+            provider = await web3Modal.connect();
+            web3 = new Web3(provider);
+        }
+        
+        console.log('Provider connected:', provider);
         
         // Subscribe to accounts change
         provider.on('accountsChanged', (accounts) => {
+            console.log('Accounts changed:', accounts);
             selectedAccount = accounts[0];
             updateUI();
         });
 
         // Subscribe to chain change
         provider.on('chainChanged', (chainId) => {
+            console.log('Chain changed:', chainId);
             currentChainId = parseInt(chainId, 16);
             updateUI();
         });
@@ -130,33 +165,19 @@ async function connectWallet() {
         const accounts = await web3.eth.getAccounts();
         selectedAccount = accounts[0];
         currentChainId = await web3.eth.getChainId();
+        console.log('Selected account:', selectedAccount);
+        console.log('Current chain ID:', currentChainId);
 
         updateUI();
     } catch (error) {
         console.error('Could not connect to wallet:', error);
         alert('Error connecting wallet: ' + error.message);
     }
-    // Add this to connectWallet function as a fallback
-    if (!provider) {
-        console.log('Trying direct connection to window.ethereum');
-    if (window.ethereum) {
-        provider = window.ethereum;
-        try {
-            await provider.request({ method: 'eth_requestAccounts' });
-        } catch (error) {
-            console.error('Direct connection error:', error);
-            alert('Please connect through your wallet extension');
-            return;
-        }
-    } else {
-        alert('No Ethereum provider found');
-        return;
-    }
-}
 }
 
 // Update UI based on wallet state
 async function updateUI() {
+    console.log('Updating UI...');
     if (selectedAccount) {
         // Update wallet info
         document.getElementById('connectWalletBtn').classList.add('d-none');
@@ -184,6 +205,7 @@ async function updateUI() {
 
 // Calculate reputation score using multiple data sources
 async function calculateReputationScore() {
+    console.log('Calculating reputation score...');
     try {
         // Get data from all sources
         const moralisData = await MoralisService.getWalletActivity(selectedAccount);
@@ -402,11 +424,6 @@ async function mintProofBadge() {
     badgeStatus.innerHTML = '<div class="alert alert-info">Minting your ProofBadge...</div>';
     
     try {
-        // In a real implementation, you would:
-        // 1. Deploy an NFT contract on Polygon Mumbai using Thirdweb
-        // 2. Call the mint function with the user's address and reputation score
-        // For now, we'll simulate this
-        
         // Simulate transaction delay
         await new Promise(resolve => setTimeout(resolve, 2000));
         
@@ -448,9 +465,3 @@ function getNetworkBadgeColor(chainId) {
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', init);
-if (typeof window.ethereum === 'undefined') {
-    console.log('No Ethereum provider detected');
-    alert('No Ethereum wallet detected. Please install MetaMask or another Web3 wallet.');
-} else {
-    console.log('Ethereum provider detected');
-}
