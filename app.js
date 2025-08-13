@@ -78,8 +78,8 @@ let scoreBreakdown = {};
 // Initialize app
 async function init() {
     // Initialize services
-    await MoralisService.init('YOUR_MORALIS_API_KEY');
-    await CovalentService.init('YOUR_COVALENT_API_KEY');
+    await MoralisService.init('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjQwMDhkMTc4LWQxNmItNDU4Yy05MTRkLWNlZjU1YzZmMjdiMyIsIm9yZ0lkIjoiNDY0MzAyIiwidXNlcklkIjoiNDc3NjY3IiwidHlwZUlkIjoiYTNhODc2MmUtYWRiNS00MDk1LWFmNmEtNDhmNGQ5ZTA4NDVkIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3NTQ4MTI3MjQsImV4cCI6NDkxMDU3MjcyNH0.ssV3d1p5s7iDcYT2rZtosJ8J_z1cuuNvF9bU5X8O2HY');
+    await CovalentService.init('cqt_rQYkGgFvK3CcfjKw9K4gGBQmxyRK');
     
     // Check if wallet is already connected
     if (web3Modal.cachedProvider) {
