@@ -81,15 +81,27 @@ async function init() {
     await MoralisService.init('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjQwMDhkMTc4LWQxNmItNDU4Yy05MTRkLWNlZjU1YzZmMjdiMyIsIm9yZ0lkIjoiNDY0MzAyIiwidXNlcklkIjoiNDc3NjY3IiwidHlwZUlkIjoiYTNhODc2MmUtYWRiNS00MDk1LWFmNmEtNDhmNGQ5ZTA4NDVkIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3NTQ4MTI3MjQsImV4cCI6NDkxMDU3MjcyNH0.ssV3d1p5s7iDcYT2rZtosJ8J_z1cuuNvF9bU5X8O2HY');
     await CovalentService.init('cqt_rQYkGgFvK3CcfjKw9K4gGBQmxyRK');
     
+   console.log('Services initialized');
+    } catch (error) {
+        console.error('Service initialization error:', error);
+        alert('Error initializing services: ' + error.message);
+    }
+
     // Check if wallet is already connected
     if (web3Modal.cachedProvider) {
-        await connectWallet();
+        try {
+            await connectWallet();
+        } catch (error) {
+            console.error('Auto-connect failed:', error);
+        }
     }
 
     // Set up event listeners
     document.getElementById('connectWalletBtn').addEventListener('click', connectWallet);
     document.getElementById('switchNetworkBtn').addEventListener('click', showNetworkSwitchModal);
     document.getElementById('mintBadgeBtn').addEventListener('click', mintProofBadge);
+
+    console.log('Event listeners set');
 }
 
 // Connect wallet
