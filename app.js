@@ -136,6 +136,23 @@ async function connectWallet() {
         console.error('Could not connect to wallet:', error);
         alert('Error connecting wallet: ' + error.message);
     }
+    // Add this to connectWallet function as a fallback
+    if (!provider) {
+        console.log('Trying direct connection to window.ethereum');
+    if (window.ethereum) {
+        provider = window.ethereum;
+        try {
+            await provider.request({ method: 'eth_requestAccounts' });
+        } catch (error) {
+            console.error('Direct connection error:', error);
+            alert('Please connect through your wallet extension');
+            return;
+        }
+    } else {
+        alert('No Ethereum provider found');
+        return;
+    }
+}
 }
 
 // Update UI based on wallet state
