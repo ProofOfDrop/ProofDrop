@@ -97,5 +97,64 @@
     
     <!-- Main App -->
     <script src="app.js"></script>
+    <script>
+    // Detect and disable problematic extensions
+    const disableProblematicExtensions = () => {
+        const badExtensions = ['Sixpence', 'MetaMask', 'Coinbase'];
+        const disableExtension = (name) => {
+            console.log(`Disabling ${name} extension interference`);
+            const script = document.createElement('script');
+            script.textContent = `
+                if (typeof window.ethereum !== 'undefined') {
+                    window.originalEthereum = window.ethereum;
+                    window.ethereum = undefined;
+                }
+            `;
+            document.documentElement.appendChild(script);
+            script.remove();
+        };
+        
+        badExtensions.forEach(ext => {
+            if (navigator.userAgent.includes(ext)) {
+                disableExtension(ext);
+            }
+        });
+    };
+    
+    // Execute after page load
+    window.addEventListener('load', () => {
+        // Detect and handle extension conflicts
+        if (navigator.userAgent.includes('Sixpence')) {
+            console.log('Sixpence extension detected - applying workaround');
+            disableProblematicExtensions();
+        }
+        
+        // Add manual connection fallback
+        const manualConnect = document.createElement('div');
+        manualConnect.id = 'manual-connect';
+        manualConnect.innerHTML = `
+            <div class="alert alert-warning mt-3">
+                <p>Wallet connection issue detected. Try manual connection:</p>
+                <button id="manualConnectBtn" class="btn btn-sm btn-secondary">
+                    Manual Connect
+                </button>
+            </div>
+        `;
+        document.getElementById('wallet-section').appendChild(manualConnect);
+        
+        document.getElementById('manualConnectBtn').addEventListener('click', () => {
+            if (window.ethereum) {
+                window.ethereum.request({ method: 'eth_requestAccounts' })
+                    .then(accounts => {
+                        selectedAccount = accounts[0];
+                        updateUI();
+                    })
+                    .catch(error => {
+                        console.error('Manual connection failed:', error);
+                    });
+            }
+        });
+    });
+</script>
 </body>
 </html>
