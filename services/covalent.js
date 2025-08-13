@@ -4,7 +4,28 @@ class CovalentService {
         this.baseUrl = 'https://api.covalenthq.com/v1';
     }
 
+    static async fetchWithCors(url) {
+        try {
+            // Try direct fetch first
+            const response = await fetch(url);
+            if (response.ok) return response;
+            
+            // Fallback to proxy if CORS issue
+            console.log('Using CORS proxy for Covalent API');
+            const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
+            return await fetch(proxyUrl);
+        } catch (error) {
+            console.error('Fetch error:', error);
+            throw error;
+        }
+    }
     static async getWalletData(address, chainId) {
+        try {
+            const url = `${this.baseUrl}/${chainId}/address/${address}/balances_v2/?quote-currency=USD&key=${this.apiKey}`;
+            const response = await this.fetchWithCors(url);
+            
+            if (!response.ok) throw new Error('Covalent API error');
+            const balancesData = await response.json();
         try {
             // Get token balances with USD values
             const balancesResponse = await fetch(
