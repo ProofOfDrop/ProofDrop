@@ -64,7 +64,8 @@ const providerOptions = {
 const web3Modal = new Web3Modal({
     cacheProvider: true,
     providerOptions,
-    theme: 'dark'
+    theme: 'dark',
+    disableInjectedProvider: false
 });
 
 // App state
@@ -109,6 +110,9 @@ async function connectWallet() {
     try {
         provider = await web3Modal.connect();
         web3 = new Web3(provider);
+
+        // Add this at the top of connectWallet function
+        console.log('connectWallet called');
         
         // Subscribe to accounts change
         provider.on('accountsChanged', (accounts) => {
@@ -427,3 +431,9 @@ function getNetworkBadgeColor(chainId) {
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', init);
+if (typeof window.ethereum === 'undefined') {
+    console.log('No Ethereum provider detected');
+    alert('No Ethereum wallet detected. Please install MetaMask or another Web3 wallet.');
+} else {
+    console.log('Ethereum provider detected');
+}
