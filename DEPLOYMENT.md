@@ -10,13 +10,17 @@ ProofDrop is now configured as a fully client-side React application that can be
 2. **Connect to Vercel**:
    - Go to [vercel.com](https://vercel.com)
    - Import your GitHub repository
-   - Vercel will auto-detect it as a Vite project
-3. **Add Environment Variables**:
+   - Vercel will auto-detect the project settings from `vercel.json`
+3. **Configure Build Settings** (should be auto-detected):
+   - Build Command: `cd client && npm run build`
+   - Output Directory: `client/dist`
+   - Install Command: `cd client && npm install`
+4. **Add Environment Variables**:
    - In Vercel dashboard, go to Settings → Environment Variables
    - Add: `VITE_COVALENT_API_KEY` (your Covalent API key)
    - Add: `VITE_MORALIS_API_KEY` (your Moralis API key)
    - Add: `VITE_WALLETCONNECT_PROJECT_ID` (optional, for WalletConnect)
-4. **Deploy**: Click Deploy and your app will be live!
+5. **Deploy**: Click Deploy and your app will be live!
 
 ### Option 2: Deploy to Netlify
 
