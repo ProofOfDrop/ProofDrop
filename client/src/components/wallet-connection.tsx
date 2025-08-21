@@ -7,7 +7,7 @@ import { Loader2, Share, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function WalletConnection() {
-  const { address, isConnected, isAnalyzing, analysis, error, analyzeWallet } = useWalletAnalysis();
+  const { address, isConnected, isAnalyzing, analysisStatus, analysis, error, analyzeWallet } = useWalletAnalysis();
   const [selectedNetwork, setSelectedNetwork] = useState<string>("");
   const { toast } = useToast();
 
@@ -137,12 +137,18 @@ export default function WalletConnection() {
                       {isAnalyzing ? (
                         <>
                           <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                          Analyzing Wallet...
+                          {analysisStatus || "Analyzing Wallet..."}
                         </>
                       ) : (
                         "🎯 Mint Your Score/Humanity"
                       )}
                     </Button>
+                    
+                    {isAnalyzing && analysisStatus && (
+                      <div className="mt-4 text-center text-sm text-gray-400">
+                        {analysisStatus}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center" data-testid="disconnected-state">
